@@ -264,12 +264,63 @@ export default {
                             headers: { "Content-Type": "application/json; charset=utf-8" }
                         });
                     }
-
-                    if (ua.includes(getGamma()) || ua.includes("meta") || ua.includes("sta" + "sh")) {
-                        return new Response(buildYamlProfile(clientHost, targetSub));
+                    const REQ_PER_GB = 6000;
+                    
+                    const usageKey = targetUser?.id
+                        ? targetUser.id.replace(/-/g, '').toLowerCase()
+                        : null;
+                    
+                    const userUsage = usageKey
+                        ? sysUsageCache?.users?.[usageKey]
+                        : null;
+                    
+                    const usedReqs = userUsage?.reqs || 0;
+                    const totalReqs = targetUser?.limitTotalReq || 0;
+                    
+                    const usedBytes = Math.floor(
+                        (usedReqs / REQ_PER_GB) * 1024 * 1024 * 1024
+                    );
+                    
+                    const totalBytes = totalReqs > 0
+                        ? Math.floor(
+                            (totalReqs / REQ_PER_GB) * 1024 * 1024 * 1024
+                          )
+                        : 1125899906842624;
+                    
+                    const expireUnix = targetUser?.expiryMs
+                        ? Math.floor(targetUser.expiryMs / 1000)
+                        : 2147483647;
+                    
+                    const subHeaders = {
+                        "Content-Type": "text/plain; charset=utf-8",
+                    
+                        "Subscription-Userinfo":
+                            `upload=0; download=${usedBytes}; total=${totalBytes}; expire=${expireUnix}`,
+                    
+                        "profile-title":
+                            `ErPyCode | ${targetUser?.name || "User"}`,
+                    
+                        "Content-Disposition":
+                            `attachment; filename="${targetUser?.name || "ErPyCode"}"`,
+                    
+                        "profile-update-interval": "24"
+                    };
+                    if (ua.includes(getGamma()) || ua.includes("meta") || ua.includes("stash")) {
+                        return new Response(
+                            buildYamlProfile(clientHost, targetSub),
+                            {
+                                headers: subHeaders
+                            }
+                        );
                     } else {
                         const raw = buildUriProfile(clientHost, targetSub);
-                        return new Response(btoa(raw));
+                    
+                        return new Response(
+                            btoa(raw),
+                            {
+                                headers: subHeaders
+                            }
+                        );
                     }
                 }
             }
@@ -1411,8 +1462,15 @@ async function processTelemetryStream(env, ctx) {
 
 async function startDataPipe(webSocket, env, ctx) {
     activeConnections++;
-    webSocket.addEventListener('close', () => activeConnections--);
-    webSocket.addEventListener('error', () => activeConnections--);
+    webSocket.addEventListener('close', () => {
+        activeConnections--;
+        releaseClient();
+    });
+    
+    webSocket.addEventListener('error', () => {
+        activeConnections--;
+        releaseClient();
+    });
     let remoteSocket, dataWriter, isInit = true, queue = Promise.resolve();
     let activeClientHash = null;
     webSocket.addEventListener("message", (event) => {
@@ -1442,8 +1500,34 @@ async function startDataPipe(webSocket, env, ctx) {
             if (!validUUIDs.includes(clientHash)) return false; // DROP IF INVALID PROFILE
             
             activeClientHash = clientHash;
+            const user = getAllProfiles().find(
+                    p => p.id.replace(/-/g, '').toLowerCase() === clientHash
+                );
+                
+                const maxConn = user?.maxConnections || 1;
+                
+                const currentTrack = uuidUsage.get(clientHash);
+                
+                if (
+                    currentTrack &&
+                    currentTrack.connects >= maxConn
+                ) {
+                    return false;
+                }
             trackUsage(activeClientHash, 0, env, ctx);
             
+            function releaseClient() {
+                    if (!activeClientHash) return;
+                
+                    const t = uuidUsage.get(activeClientHash);
+                
+                    if (!t) return;
+                
+                    t.connects = Math.max(0, t.connects - 1);
+                
+                    uuidUsage.set(activeClientHash, t);
+                }
+                            
             let uTrack = uuidUsage.get(clientHash) || { connects: 0, last: 0 };
             uTrack.connects++;
             uTrack.last = Date.now();
@@ -2725,15 +2809,14 @@ function getDashboardUI(hasDB) {
                           <div class="bg-white dark:bg-darkcard rounded-3xl p-6 shadow-sm border border-slate-200 dark:border-darkborder grid grid-cols-1 md:grid-cols-2 gap-5">
                               <div class="space-y-1">
                                   <label class="block text-sm font-bold text-slate-600 dark:text-slate-300 ms-1" data-i18n="lbl_proto">Primary Display Mode</label>
-                                  <select id="cfg-proto" class="w-full px-4 py-3 rounded-xl border border-slate-200 dark:border-darkborder bg-slate-50 dark:bg-slate-800 focus:border-primary focus:ring-1 outline-none appearance-none">
-                                      <option value="alpha">Alpha Mode (V-Core)</option>
+                                  <select id="cfg-proto" class="w-full px-4 py-2 rounded-xl border border-slate-200 dark:border-darkborder bg-slate-50 dark:bg-slate-800 focus:border-primary focus:ring-1 outline-none appearance-none">                                      <option value="alpha">Alpha Mode (V-Core)</option>
                                       <option value="beta">Beta Mode (T-Core)</option>
                                       <option value="both">Both (V-Core & T-Core)</option>
                                   </select>
                               </div>
                               <div class="space-y-1">
                                   <label class="block text-sm font-bold text-slate-600 dark:text-slate-300 ms-1" data-i18n="lbl_port">Data Port (Multi-Select)</label>
-                                  <select id="cfg-port" multiple class="w-full h-32 px-4 py-3 rounded-xl border border-slate-200 dark:border-darkborder bg-slate-50 dark:bg-slate-800 focus:border-primary focus:ring-1 outline-none text-sm font-mono">
+                                  <select id="cfg-port" multiple style="display:none">
                                       <option value="443" selected>443 (Secure TLS)</option>
                                       <option value="2053">2053 (Secure TLS)</option>
                                       <option value="2083">2083 (Secure TLS)</option>
@@ -2748,6 +2831,23 @@ function getDashboardUI(hasDB) {
                                       <option value="2086">2086 (Alt Standard)</option>
                                       <option value="2095">2095 (Alt Standard)</option>
                                   </select>
+                                  <div id="port-checkboxes" class="grid grid-cols-2 md:grid-cols-3 gap-2 mt-2">
+                                    <label><input type="checkbox" class="cfg-port-check" value="443" checked> 443 TLS</label>
+                                    <label><input type="checkbox" class="cfg-port-check" value="2053"> 2053 TLS</label>
+                                    <label><input type="checkbox" class="cfg-port-check" value="2083"> 2083 TLS</label>
+                                    <label><input type="checkbox" class="cfg-port-check" value="2087"> 2087 TLS</label>
+                                    <label><input type="checkbox" class="cfg-port-check" value="2096"> 2096 TLS</label>
+                                    <label><input type="checkbox" class="cfg-port-check" value="8443"> 8443 TLS</label>
+
+                                    <label><input type="checkbox" class="cfg-port-check" value="80"> 80 HTTP</label>
+                                    <label><input type="checkbox" class="cfg-port-check" value="8080"> 8080 HTTP</label>
+                                    <label><input type="checkbox" class="cfg-port-check" value="8880"> 8880 HTTP</label>
+                                    <label><input type="checkbox" class="cfg-port-check" value="2052"> 2052 HTTP</label>
+                                    <label><input type="checkbox" class="cfg-port-check" value="2082"> 2082 HTTP</label>
+                                    <label><input type="checkbox" class="cfg-port-check" value="2086"> 2086 HTTP</label>
+                                    <label><input type="checkbox" class="cfg-port-check" value="2095"> 2095 HTTP</label>
+
+                                    </div>
                               </div>
                               <div class="space-y-1 md:col-span-2">
                                   <div class="flex justify-between items-center">
@@ -3028,6 +3128,19 @@ function getDashboardUI(hasDB) {
                                       <label class="block text-xs font-bold text-slate-500 mb-1" data-i18n="limit_days">Expiration limit (Days) - Leave empty for unlimited</label>
                                       <input type="number" id="add-user-days" class="w-full px-4 py-2 rounded-xl border border-slate-200 dark:border-darkborder bg-slate-50 dark:bg-slate-800 focus:border-primary outline-none">
                                   </div>
+                                    <div>
+                                    <label class="block text-xs font-bold text-slate-500 mb-1"
+                                        data-i18n="limit_devices">
+                                        Device Limit
+                                    </label>
+
+                                    <input
+                                        type="number"
+                                        id="add-user-device-limit"
+                                        min="1"
+                                        value="1"
+                                        class="w-full px-4 py-2 rounded-xl border border-slate-200 dark:border-darkborder bg-slate-50 dark:bg-slate-800 focus:border-primary outline-none">
+                                    </div>
                                   <div class="flex justify-end gap-2 mt-6">
                                       <button onclick="document.getElementById('modal-add-user').classList.add('hidden')" class="px-4 py-2 rounded-xl bg-slate-100 dark:bg-slate-800 text-slate-600 dark:text-slate-300 font-bold" data-i18n="btn_cancel">Cancel</button>
                                       <button onclick="commitAddUser()" class="px-4 py-2 rounded-xl bg-primary text-white font-bold" data-i18n="save_btn_user">Save User</button>
@@ -3058,6 +3171,18 @@ function getDashboardUI(hasDB) {
                                       <label class="block text-xs font-bold text-slate-500 mb-1" data-i18n="limit_days">Expiration limit (Days remaining) - Leave empty for unlimited</label>
                                       <input type="number" id="edit-user-days" class="w-full px-4 py-2 rounded-xl border border-slate-200 dark:border-darkborder bg-slate-50 dark:bg-slate-800 focus:border-primary outline-none">
                                   </div>
+                                    <div>
+                                        <label class="block text-xs font-bold text-slate-500 mb-1"
+                                                data-i18n="limit_devices"> Device Limit
+                                        </label>
+
+                                        <input
+                                            type="number"
+                                            min="1"
+                                            value="1"
+                                            id="edit-user-device-limit"
+                                            class="w-full px-4 py-2 rounded-xl border border-slate-200 dark:border-darkborder bg-slate-50 dark:bg-slate-800 focus:border-primary outline-none">
+                                    </div>
                                   <div class="flex justify-end gap-2 mt-6">
                                       <button onclick="document.getElementById('modal-edit-user').classList.add('hidden')" class="px-4 py-2 rounded-xl bg-slate-100 dark:bg-slate-800 text-slate-600 dark:text-slate-300 font-bold" data-i18n="btn_cancel">Cancel</button>
                                       <button onclick="commitEditUser()" class="px-4 py-2 rounded-xl bg-primary text-white font-bold" data-i18n="btn_save_changes">Save Changes</button>
@@ -3204,7 +3329,7 @@ function getDashboardUI(hasDB) {
                   tab_users: "Users",
                   user_mgt_title: "User Management", user_mgt_desc: "Manage multiple users, set traffic limits, and expiration dates.", btn_add_user: "+ Add New User",
                   tbl_name: "Name", tbl_uuid: "UUID", tbl_traffic: "Traffic (Used / Limit)", tbl_exp: "Expiration", tbl_action: "Action", no_users: "No users found. Create one above.",
-                  modal_add_title: "Add New User", lbl_u_name: "Name (Required)", lbl_u_gb: "Traffic Limit (GB) - Optional", lbl_u_days: "Duration (Days) - Optional", btn_cancel: "Cancel", btn_confirm: "Add User",
+                  modal_add_title: "Add New User", lbl_u_name: "Name (Required)", lbl_u_gb: "Traffic Limit (GB) - Optional", lbl_u_days: "Duration (Days) - Optional", btn_cancel: "Cancel", btn_confirm: "Add User",limit_devices: "Device Limit",
                   limit_total: "Total Requests Limit (Leave empty for unlimited)", limit_daily: "Daily Requests Limit (Leave empty for unlimited)",
                   limit_days: "Expiration limit (Days) - Leave empty for unlimited", edit_sub: "Edit Subscriber", lbl_name_ph: "Name or UUID",
                   btn_save_changes: "Save Changes", save_btn_user: "Save User", status_active: "Active", status_paused: "Paused", status_expired: "Expired",
@@ -3235,7 +3360,7 @@ function getDashboardUI(hasDB) {
                   tab_users: "کاربران",
                   user_mgt_title: "مدیریت کاربران", user_mgt_desc: "مدیریت کاربران متعدد، تنظیم محدودیت ترافیک، و تاریخ انقضا.", btn_add_user: "+ افزودن کاربر جدید",
                   tbl_name: "نام", tbl_uuid: "شناسه یکتا", tbl_traffic: "ترافیک (مصرفی/محدودیت)", tbl_exp: "انقضا", tbl_action: "عملیات", no_users: "کاربری یافت نشد. از دکمه بالا یک کاربر ایجاد کنید.",
-                  modal_add_title: "افزودن کاربر جدید", lbl_u_name: "نام (الزامی)", lbl_u_gb: "محدودیت ترافیک (گیگابایت) - اختیاری", lbl_u_days: "مدت زمان اعتبار (روز) - اختیاری", btn_cancel: "انصراف", btn_confirm: "افزودن کاربر",
+                  modal_add_title: "افزودن کاربر جدید", lbl_u_name: "نام (الزامی)", lbl_u_gb: "محدودیت ترافیک (گیگابایت) - اختیاری", lbl_u_days: "مدت زمان اعتبار (روز) - اختیاری", btn_cancel: "انصراف", btn_confirm: "افزودن کاربر",limit_devices: "محدودیت دستگاه",
                   save_btn: "ذخیره تنظیمات", msg_saving: "در حال ثبت...", msg_saved: "موفق! در حال بارگذاری...", msg_err: "خطای ارتباط",
                   backup_restore_title: "پشتیبان‌گیری و بازیابی", ping_test_title: "عیب‌یابی تاخیر شبکه", ping_test_desc: "تاخیر پاسخ‌دهی را به آی‌پی تمیز فعال اندازه بگیرید.",
                   lbl_github_repo: "مخزن منبع جهت بروزرسانی", update_avail: "بروزرسانی جدید در دسترس است!", update_btn: "دریافت آخرین کد",
@@ -3400,7 +3525,17 @@ function getDashboardUI(hasDB) {
               document.getElementById('qr-modal').classList.add('hidden');
               document.getElementById('qr-modal').classList.remove('flex');
           }
-  
+            function syncPortCheckboxes() {
+                const selected = Array.from(
+                    document.querySelectorAll('.cfg-port-check:checked')
+                ).map(x => x.value);
+
+                const select = document.getElementById('cfg-port');
+
+                Array.from(select.options).forEach(opt => {
+                    opt.selected = selected.includes(opt.value);
+                });
+            }
           function updateUI() {
               try {
                   let portsStr = Array.from(document.getElementById('cfg-port').selectedOptions).map(o=>o.value).join(',');
@@ -3472,7 +3607,9 @@ function getDashboardUI(hasDB) {
                       const mapId = (id, val) => { const el = document.getElementById(id); if (el && val !== undefined) el.value = val; };
                       mapId('cfg-proto', conf.mode);
                       let pList = (conf.socketPorts || conf.socketPort || '443').split(',');
+                      document.querySelectorAll('.cfg-port-check').forEach(cb => { cb.checked = pList.includes(cb.value);});
                       Array.from(document.getElementById('cfg-port').options).forEach(o => o.selected = pList.includes(o.value));
+                      document.querySelectorAll('.cfg-port-check').forEach(cb => {cb.checked = pList.includes(cb.value);});
                       mapId('cfg-uuid', conf.deviceId);
                       mapId('cfg-path', conf.apiRoute);
                       mapId('cfg-pass', conf.masterKey);
@@ -3563,6 +3700,7 @@ function getDashboardUI(hasDB) {
                       const conf = data.config;
                       document.getElementById('cfg-proto').value = conf.mode || 'alpha';
                       let pList = (conf.socketPorts || conf.socketPort || '443').split(',');
+                      document.querySelectorAll('.cfg-port-check').forEach(cb => {cb.checked = pList.includes(cb.value);});
                       Array.from(document.getElementById('cfg-port').options).forEach(o => o.selected = pList.includes(o.value));
                       document.getElementById('cfg-uuid').value = conf.deviceId || '';
                       document.getElementById('cfg-path').value = conf.apiRoute || '';
@@ -3683,7 +3821,7 @@ function getDashboardUI(hasDB) {
               const payload = {
                   key: sessionKey,
                   config: {
-                      mode: el('cfg-proto').value, socketPorts: Array.from(el('cfg-port').selectedOptions).map(o=>o.value).join(','), deviceId: el('cfg-uuid').value,
+                      mode: el('cfg-proto').value,socketPorts: Array.from(document.querySelectorAll('.cfg-port-check:checked')).map(cb => cb.value).join(','),deviceId: el('cfg-uuid').value,
                       apiRoute: el('cfg-path').value, masterKey: el('cfg-pass').value, agent: el('cfg-fp').value,
                       resolveIp: el('cfg-dns').value, customDns: el('cfg-custom-dns').value ? el('cfg-custom-dns').value : 'https://cloudflare-dns.com/dns-query', cleanIps: el('cfg-ips').value, slaveNodes: el('cfg-nodes').value, maintenanceHost: el('cfg-fake').value, backupRelay: el('cfg-relay').value,
                       enableOpt1: el('cfg-tfo').checked, enableOpt2: el('cfg-ech').checked,
@@ -3725,7 +3863,7 @@ function getDashboardUI(hasDB) {
               const payload = {
                   key: sessionKey,
                   config: {
-                      mode: el('cfg-proto').value, socketPorts: Array.from(el('cfg-port').selectedOptions).map(o=>o.value).join(','), deviceId: el('cfg-uuid').value,
+                      mode: el('cfg-proto').value, socketPorts: Array.from(document.querySelectorAll('.cfg-port-check:checked')).map(cb => cb.value).join(','), deviceId: el('cfg-uuid').value,
                       apiRoute: el('cfg-path').value, masterKey: el('cfg-pass').value, agent: el('cfg-fp').value,
                       resolveIp: el('cfg-dns').value, customDns: el('cfg-custom-dns').value ? el('cfg-custom-dns').value : 'https://cloudflare-dns.com/dns-query', cleanIps: el('cfg-ips').value, slaveNodes: el('cfg-nodes').value, maintenanceHost: el('cfg-fake').value, backupRelay: el('cfg-relay').value,
                       enableOpt1: el('cfg-tfo').checked, enableOpt2: el('cfg-ech').checked,
@@ -3842,6 +3980,17 @@ function getDashboardUI(hasDB) {
 
                   let resetBtnHtml = \`<button onclick="resetUserTraffic('\${u.id}')" class="text-violet-500 hover:text-violet-700 bg-violet-50 hover:bg-violet-100 dark:bg-violet-900/30 dark:hover:bg-violet-800/50 p-2 rounded-lg" title="\${resetTitle}">🔄</button>\`;
 
+                  const trafficPercent = u.limitTotalReq
+                     ? Math.min(100, (userReqs / u.limitTotalReq) * 100)
+                     : 0;
+
+                     let trafficColor = 'bg-emerald-500';
+
+                            if (trafficPercent >= 80) {
+                                trafficColor = 'bg-red-500';
+                            } else if (trafficPercent >= 50) {
+                                trafficColor = 'bg-yellow-500';
+                            }
                   let tr = document.createElement('tr');
                   tr.className = "hover:bg-slate-50 dark:hover:bg-slate-800/50 transition-colors";
                   
@@ -3855,9 +4004,15 @@ function getDashboardUI(hasDB) {
                       <td class="px-4 py-4 font-mono text-xs text-slate-500 select-all">\${u.id}</td>
                       <td class="px-4 py-4 text-slate-600 dark:text-slate-400 font-mono">
                           <div class="flex flex-col gap-1">
-                              <span class="font-bold text-xs flex items-center gap-1"><span class="w-2 h-2 rounded-full bg-emerald-500"></span>\${totalLabel} \${userReqs} \${rLabel} (\${(userReqs/6000).toFixed(2)} GB) / \${u.limitTotalReq ? (u.limitTotalReq + ' ' + rLabel + ' (' + (u.limitTotalReq/6000).toFixed(2) + ' GB)') : \`\${unlimitedTxt}\`} (\${perT})</span>
-                              <span class="text-[11px] opacity-70 flex items-center gap-1"><span class="w-1.5 h-1.5 rounded-full bg-indigo-500"></span>\${dailyLabel} \${userDReqs} \${rLabel} (\dots) / \${u.limitDailyReq ? (u.limitDailyReq + ' ' + rLabel + ' (' + (u.limitDailyReq/6000).toFixed(2) + ' GB)') : \`\${unlimitedTxt}\`} (\${perD})</span>
-                          </div>
+                              <span class="font-bold text-xs flex items-center gap-1"><span class="w-2 h-3 rounded-full bg-emerald-500"></span>\${totalLabel} \${userReqs} \${rLabel} (\${(userReqs/6000).toFixed(2)} GB) / \${u.limitTotalReq ? (u.limitTotalReq + ' ' + rLabel + ' (' + (u.limitTotalReq/6000).toFixed(2) + ' GB)') : \`\${unlimitedTxt}\`} (\${perT})</span>
+                              <div class="w-full bg-slate-200 dark:bg-slate-700 rounded-full h-4 mt-1">
+                                <div
+                                    class="bg-emerald-500 h-3 rounded-full"
+                                    style="width:\${trafficPercent}%">
+                                </div>
+                            </div>
+                                <span class="text-[11px] opacity-70 flex items-center gap-1"><span class="w-1.5 h-1.5 rounded-full bg-indigo-500"></span>\${dailyLabel} \${userDReqs} \${rLabel} (\${(userDReqs/6000).toFixed(2)} GB) / \${u.limitDailyReq ? (u.limitDailyReq + ' ' + rLabel + ' (' + (u.limitDailyReq/6000).toFixed(2) + ' GB)') : \`\${unlimitedTxt}\`} (\${perD})</span>                         
+                                 </div>
                       </td>
                       <td class="px-4 py-4 text-slate-600 dark:text-slate-400">\${expTxt}</td>
                       <td class="px-4 py-4 text-end space-x-1.5 space-x-reverse">
@@ -3923,6 +4078,7 @@ function getDashboardUI(hasDB) {
               const name = document.getElementById('add-user-name').value;
               let tReq = document.getElementById('add-user-total-reqs').value;
               let dReq = document.getElementById('add-user-daily-reqs').value;
+              let deviceLimit = document.getElementById('add-user-device-limit').value;
               let days = document.getElementById('add-user-days').value;
               
               if(!name) {
@@ -3933,6 +4089,7 @@ function getDashboardUI(hasDB) {
               tReq = tReq ? parseInt(tReq) : null;
               dReq = dReq ? parseInt(dReq) : null;
               days = days ? parseInt(days) : null;
+              deviceLimit = deviceLimit ? parseInt(deviceLimit) : 1;
               
               if(!window.nahanConfig) window.nahanConfig = {};
               if(!window.nahanConfig.users) window.nahanConfig.users = [];
@@ -3940,14 +4097,15 @@ function getDashboardUI(hasDB) {
               let newId = Array.from(crypto.getRandomValues(new Uint8Array(16)))
                   .map((b,i) => (i===4||i===6||i===8||i===10?'-':'') + b.toString(16).padStart(2,'0')).join('');
               
-              const u = {
-                  id: newId,
-                  name: name,
-                  limitTotalReq: tReq,
-                  limitDailyReq: dReq,
-                  expiryMs: days ? Date.now() + days*86400000 : null,
-                  createdAt: Date.now()
-              };
+                const u = {
+                id: newId,
+                name: name,
+                limitTotalReq: tReq,
+                limitDailyReq: dReq,
+                expiryMs: days ? Date.now() + days*86400000 : null,
+                maxConnections: deviceLimit,
+                createdAt: Date.now()
+            };
               
               window.nahanConfig.users.push(u);
               document.getElementById('modal-add-user').classList.add('hidden');
@@ -3969,6 +4127,7 @@ function getDashboardUI(hasDB) {
               document.getElementById('edit-user-name').value = u.name;
               document.getElementById('edit-user-total-reqs').value = u.limitTotalReq || '';
               document.getElementById('edit-user-daily-reqs').value = u.limitDailyReq || '';
+              document.getElementById('edit-user-device-limit').value = u.maxConnections || 1;
               
               let daysLeft = '';
               if(u.expiryMs) {
@@ -3986,6 +4145,11 @@ function getDashboardUI(hasDB) {
               let tReq = document.getElementById('edit-user-total-reqs').value;
               let dReq = document.getElementById('edit-user-daily-reqs').value;
               let days = document.getElementById('edit-user-days').value;
+              let deviceLimit =
+                    document.getElementById('edit-user-device-limit').value;
+                    deviceLimit = deviceLimit
+                        ? parseInt(deviceLimit)
+                        : 1;
               
               if(!name) {
                   const enterNameMsg = lang === 'fa' ? 'لطفاً نام را وارد کنید' : 'Please enter a name';
@@ -4004,6 +4168,7 @@ function getDashboardUI(hasDB) {
               u.limitTotalReq = tReq;
               u.limitDailyReq = dReq;
               u.expiryMs = days ? Date.now() + days*86400000 : null;
+              u.maxConnections = deviceLimit;
               
               document.getElementById('modal-edit-user').classList.add('hidden');
               renderUsersTable();
