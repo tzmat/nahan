@@ -5,7 +5,7 @@ import { connect } from "cloudflare:sockets";
  * Handles real-time binary streams from remote sensor nodes.
  */
 
-const CURRENT_VERSION = "2.4.0.1";
+const CURRENT_VERSION = "2.4.6";
 
 const getAlpha = () => String.fromCharCode(118, 108, 101, 115, 115);
 const getBeta = () => String.fromCharCode(116, 114, 111, 106, 97, 110);
@@ -3279,7 +3279,7 @@ function getDashboardUI(hasDB) {
                       </div>
                       <div>
                           <h3 class="text-lg font-black text-slate-800 dark:text-white" data-i18n="v_pop_title">Version Update</h3>
-                          <span class="text-[10px] font-bold px-2 py-0.5 bg-indigo-500 text-white rounded-full tracking-wide">v2.4.0.1</span>
+                          <span class="text-[10px] font-bold px-2 py-0.5 bg-indigo-500 text-white rounded-full tracking-wide">v2.4.6</span>
                       </div>
                   </div>
                   <button onclick="closeVersionModal()" class="text-slate-400 hover:text-slate-700 dark:hover:text-white bg-slate-50 dark:bg-slate-800 p-2 rounded-xl border border-slate-100 dark:border-darkborder transition-colors">
@@ -3312,7 +3312,7 @@ function getDashboardUI(hasDB) {
       </div>
   
       <script>
-          const CURRENT_VERSION = "2.4.0.1";
+          const CURRENT_VERSION = "2.4.6";
           const i18n = {
               en: {
                   title: "Nahan Gateway", pass_ph: "Master Key", login_btn: "Authenticate", err_pass: "Access Denied", missing_db: "⚠️ IOT_DB namespace missing! Settings won't save.",
