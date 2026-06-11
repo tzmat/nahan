@@ -3951,6 +3951,17 @@ function getDashboardUI(hasDB) {
 
                   let resetBtnHtml = \`<button onclick="resetUserTraffic('\${u.id}')" class="text-violet-500 hover:text-violet-700 bg-violet-50 hover:bg-violet-100 dark:bg-violet-900/30 dark:hover:bg-violet-800/50 p-2 rounded-lg" title="\${resetTitle}">🔄</button>\`;
 
+                  const trafficPercent = u.limitTotalReq
+                     ? Math.min(100, (userReqs / u.limitTotalReq) * 100)
+                     : 0;
+
+                     let trafficColor = 'bg-emerald-500';
+
+                            if (trafficPercent >= 80) {
+                                trafficColor = 'bg-red-500';
+                            } else if (trafficPercent >= 50) {
+                                trafficColor = 'bg-yellow-500';
+                            }
                   let tr = document.createElement('tr');
                   tr.className = "hover:bg-slate-50 dark:hover:bg-slate-800/50 transition-colors";
                   
@@ -3964,9 +3975,15 @@ function getDashboardUI(hasDB) {
                       <td class="px-4 py-4 font-mono text-xs text-slate-500 select-all">\${u.id}</td>
                       <td class="px-4 py-4 text-slate-600 dark:text-slate-400 font-mono">
                           <div class="flex flex-col gap-1">
-                              <span class="font-bold text-xs flex items-center gap-1"><span class="w-2 h-2 rounded-full bg-emerald-500"></span>\${totalLabel} \${userReqs} \${rLabel} (\${(userReqs/6000).toFixed(2)} GB) / \${u.limitTotalReq ? (u.limitTotalReq + ' ' + rLabel + ' (' + (u.limitTotalReq/6000).toFixed(2) + ' GB)') : \`\${unlimitedTxt}\`} (\${perT})</span>
-                              <span class="text-[11px] opacity-70 flex items-center gap-1"><span class="w-1.5 h-1.5 rounded-full bg-indigo-500"></span>\${dailyLabel} \${userDReqs} \${rLabel} (\dots) / \${u.limitDailyReq ? (u.limitDailyReq + ' ' + rLabel + ' (' + (u.limitDailyReq/6000).toFixed(2) + ' GB)') : \`\${unlimitedTxt}\`} (\${perD})</span>
-                          </div>
+                              <span class="font-bold text-xs flex items-center gap-1"><span class="w-2 h-3 rounded-full bg-emerald-500"></span>\${totalLabel} \${userReqs} \${rLabel} (\${(userReqs/6000).toFixed(2)} GB) / \${u.limitTotalReq ? (u.limitTotalReq + ' ' + rLabel + ' (' + (u.limitTotalReq/6000).toFixed(2) + ' GB)') : \`\${unlimitedTxt}\`} (\${perT})</span>
+                              <div class="w-full bg-slate-200 dark:bg-slate-700 rounded-full h-4 mt-1">
+                                <div
+                                    class="bg-emerald-500 h-3 rounded-full"
+                                    style="width:\${trafficPercent}%">
+                                </div>
+                            </div>
+                                <span class="text-[11px] opacity-70 flex items-center gap-1"><span class="w-1.5 h-1.5 rounded-full bg-indigo-500"></span>\${dailyLabel} \${userDReqs} \${rLabel} (\${(userDReqs/6000).toFixed(2)} GB) / \${u.limitDailyReq ? (u.limitDailyReq + ' ' + rLabel + ' (' + (u.limitDailyReq/6000).toFixed(2) + ' GB)') : \`\${unlimitedTxt}\`} (\${perD})</span>                         
+                                 </div>
                       </td>
                       <td class="px-4 py-4 text-slate-600 dark:text-slate-400">\${expTxt}</td>
                       <td class="px-4 py-4 text-end space-x-1.5 space-x-reverse">
