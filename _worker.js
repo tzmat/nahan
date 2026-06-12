@@ -882,7 +882,7 @@ async function handleConfigSync(request, env, ctx) {
 
 const botI18n = {
     en: {
-        welcome: "🤖 <b>Welcome to Nahan Gateway Bot</b>\nSelect your option below to manage your system:",
+        welcome: "🤖 **Welcome to Nahan Gateway Bot**\nSelect your option below to manage your system:",
         status: "📊 System Status",
         users: "👥 Subscribers",
         metrics: "📡 Gateway Health",
@@ -923,7 +923,7 @@ const botI18n = {
         status_updated: "Status updated! 🔁"
     },
     fa: {
-        welcome: "🤖 <b>به ربات ترانزیت نهان خوش آمدید</b>\nجهت مدیریت سیستم نظارتی خود یکی از گزینه‌های زیر را انتخاب نمایید:",
+        welcome: "🤖 **به ربات ترانزیت نهان خوش آمدید**\nجهت مدیریت سیستم نظارتی خود یکی از گزینه‌های زیر را انتخاب نمایید:",
         status: "📊 وضعیت سیستم",
         users: "👥 مدیریت مشترکین",
         metrics: "📡 سلامت درگاه شبکه",
@@ -1015,8 +1015,8 @@ async function handleTelegramWebhook(request, env, hostName, ctx) {
             const statusEmoji = isPaused ? "🔴" : "🟢";
             const text = `${t("welcome")}\n\n` +
                          `━━━━━━━━━━━━━━━━\n` +
-                         `⚡ <b>${t("status")}</b>: ${isPaused ? t("paused") : t("active")} ${statusEmoji}\n` +
-                         `👥 <b>${t("users")}</b>: ${sysConfig.users?.length || 0}\n` +
+                         `⚡ **${t("status")}**: ${isPaused ? t("paused") : t("active")} ${statusEmoji}\n` +
+                         `👥 **${t("users")}**: ${sysConfig.users?.length || 0}\n` +
                          `━━━━━━━━━━━━━━━━`;
             const panelUrl = `https://${hostName}/${encodeURI(sysConfig.apiRoute)}/dash`;
             const kb = {
@@ -1048,14 +1048,14 @@ async function handleTelegramWebhook(request, env, hostName, ctx) {
             const end = start + itemsPerPage;
             const pageUsers = users.slice(start, end);
             
-            let text = `👥 <b>${t("users")}</b> (Page ${page + 1}/${Math.max(1, totalPages)})\n`;
+            let text = `👥 **${t("users")}** (Page ${page + 1}/${Math.max(1, totalPages)})\n`;
             text += `━━━━━━━━━━━━━━━━\n`;
             
             if (users.length === 0) {
                 text += `⚠️ ${t("no_users")}\n`;
             } else {
                 pageUsers.forEach((u, idx) => {
-                    text += `${start + idx + 1}. 👤 <b>${u.name}</b>\n   <code>${u.id}</code>\n`;
+                    text += `${start + idx + 1}. 👤 **${u.name}**\n   <code>${u.id}</code>\n`;
                 });
             }
             text += `━━━━━━━━━━━━━━━━`;
@@ -1112,16 +1112,16 @@ async function handleTelegramWebhook(request, env, hostName, ctx) {
             const statusText = u.isPaused ? t("paused") : (isExp ? (langCode==='fa'?'منقضی':'Expired') : t("active"));
             const subSync = `https://${hostName}/${sysConfig.apiRoute}?sub=${encodeURIComponent(u.name)}`;
             
-            let text = `👤 <b>${t("sub_info")}</b>\n`;
+            let text = `👤 **${t("sub_info")}**\n`;
             text += `━━━━━━━━━━━━━━━━\n`;
-            text += `📛 <b>${t("name")}</b>: ${u.name}\n`;
-            text += `🆔 <b>UUID</b>: <code>${u.id}</code>\n`;
-            text += `🚦 <b>Status</b>: ${statusEmoji} ${statusText}\n`;
-            text += `📊 <b>${t("total")}</b>: ${userReqs} / ${limitTotalTxt}\n`;
-            text += `⏱ <b>${t("daily")}</b>: ${userDReqs} / ${limitDailyTxt}\n`;
-            text += `📅 <b>${t("expiry")}</b>: ${expTxt}\n`;
+            text += `📛 **${t("name")}**: ${u.name}\n`;
+            text += `🆔 **UUID**: <code>${u.id}</code>\n`;
+            text += `🚦 **Status**: ${statusEmoji} ${statusText}\n`;
+            text += `📊 **${t("total")}**: ${userReqs} / ${limitTotalTxt}\n`;
+            text += `⏱ **${t("daily")}**: ${userDReqs} / ${limitDailyTxt}\n`;
+            text += `📅 **${t("expiry")}**: ${expTxt}\n`;
             text += `━━━━━━━━━━━━━━━━\n`;
-            text += `🔗 <b>Subscription Connection:</b>\n<code>${subSync}</code>`;
+            text += `🔗 **Subscription Connection:**\n<code>${subSync}</code>`;
             
             const kb = {
                 inline_keyboard: [
@@ -1178,11 +1178,11 @@ async function handleTelegramWebhook(request, env, hostName, ctx) {
                     const dh = Math.floor(upSeconds/3600);
                     const dm = Math.floor((upSeconds%3600)/60);
                     
-                    let text = `📡 <b>${t("metrics")}</b>\n`;
+                    let text = `📡 **${t("metrics")}**\n`;
                     text += `━━━━━━━━━━━━━━━━\n`;
-                    text += `⏱ <b>${t("uptime")}</b>: ${dh}h ${dm}m\n`;
-                    text += `🔌 <b>${t("streams")}</b>: ${activeConnections}\n`;
-                    text += `📊 <b>Cloudflare API Usage</b>: ${usageStr}\n`;
+                    text += `⏱ **${t("uptime")}**: ${dh}h ${dm}m\n`;
+                    text += `🔌 **${t("streams")}**: ${activeConnections}\n`;
+                    text += `📊 **Cloudflare API Usage**: ${usageStr}\n`;
                     text += `━━━━━━━━━━━━━━━━`;
                     
                     const kb = { inline_keyboard: [[{ text: `🔙 Main Menu`, callback_data: "main_menu" }]] };
@@ -1210,7 +1210,7 @@ async function handleTelegramWebhook(request, env, hostName, ctx) {
                     const uuid = data.replace("sub_del_init:", "");
                     const u = sysConfig.users?.find(usr => usr.id === uuid);
                     const name = u ? u.name : "";
-                    const text = `${t("msg_confirm_del")}\n\n👤 <b>${name}</b>`;
+                    const text = `${t("msg_confirm_del")}\n\n👤 **${name}**`;
                     const kb = {
                         inline_keyboard: [
                             [
@@ -1336,7 +1336,7 @@ async function handleTelegramWebhook(request, env, hostName, ctx) {
                         tgState[chatId] = { step: "sub_add_limits", name: name };
                         await d1Put(env, "tg_bot_state", JSON.stringify(tgState));
                         
-                        const msg = `⚙️ <b>${name}</b>\n\n${t("msg_enter_limits")}`;
+                        const msg = `⚙️ **${name}**\n\n${t("msg_enter_limits")}`;
                         const kb = {
                             inline_keyboard: [
                                 [{ text: `♾️ Skip (Unlimited)`, callback_data: "sub_add_unlimited_skip" }],
