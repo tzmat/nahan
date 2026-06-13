@@ -2932,7 +2932,11 @@ function getDashboardUI(hasDB) {
                                   <p class="text-xs uppercase font-bold text-slate-400 mb-1" data-i18n="stat_loc">Data Region</p>
                                   <p id="net-loc" class="text-lg font-bold truncate">...</p>
                               </div>
-  
+                              <div class="bg-white dark:bg-darkcard p-6 rounded-3xl shadow-sm border border-slate-200 dark:border-darkborder relative overflow-hidden group sm:col-span-2 lg:col-span-1">
+                                  <svg class="w-8 h-8 text-blue-500 mb-4"  width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-clock10-icon lucide-clock-10"><circle cx="12" cy="12" r="10"/><path d="M12 6v6l-4-2"/></svg>
+                                  <p class="text-xs uppercase font-bold text-slate-400 mb-1" data-i18n="stat_datetime">Date Time</p>
+                                  <p id="net-datetime" class="text-lg font-bold truncate text-center"  dir="rtl">...</p>
+                              </div>
                               <!-- Diagnostics Segment -->
                               <div class="bg-white dark:bg-darkcard p-6 rounded-3xl shadow-sm border border-slate-200 dark:border-darkborder relative overflow-hidden group sm:col-span-2 lg:col-span-3">
                                   <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
@@ -3570,6 +3574,7 @@ function getDashboardUI(hasDB) {
                   v_pop_title: "Release Notice", v_pop_whatsnew: "What's New", v_pop_headline: "New Features & Improvements",
                   v_pop_b1_title: "Add Custom Protocol-Port And Max Config For Users",
                   desc_custom_panel_url:"Optionally specify a custom domain/URL to be used for subscription/sync links. If empty, the default Worker address will be used.",
+                  stat_datetime:"Date Time",
                   v_pop_b2_title: "",
                   v_pop_b3_title: "",
                   v_pop_b4_title: "",
@@ -3617,6 +3622,7 @@ function getDashboardUI(hasDB) {
                   v_pop_b1_title: "اضافه شدن تنظیمات جدا برای هرکاربر(تعداد گانفیگ،پروتکل وپورت)",
                   lbl_custom_panel_url:"آدرس اینترنتی پنل سفارشی / دامنه اشتراک",
                    desc_custom_panel_url:"در صورت تمایل، یک دامنه/آدرس اینترنتی سفارشی برای استفاده از لینک‌های اشتراک/همگام‌سازی مشخص کنید. در صورت خالی بودن، از آدرس پیش‌فرض Worker استفاده خواهد شد.",
+                   stat_datetime:"زمان",
                   v_pop_b2_title: "",
                   v_pop_b3_title: "",
                   v_pop_b4_title: "",
@@ -3944,7 +3950,6 @@ function getDashboardUI(hasDB) {
                       document.getElementById('net-ip').textContent = data.network.ip;
                       document.getElementById('net-colo').textContent = data.network.colo;
                       document.getElementById('net-loc').textContent = data.network.loc;
-                      
                       const conf = data.config;
                       document.getElementById('cfg-proto').value = conf.mode || 'alpha';
                       let pList = (conf.socketPorts || conf.socketPort || '443').split(',');
@@ -3991,7 +3996,7 @@ function getDashboardUI(hasDB) {
 
                       
             
-  window.toggleAccordion = function(btn) 
+                     window.toggleAccordion = function(btn) 
                         {
                             const card = btn.closest('[data-accordion]');
                             const content = card.querySelector('[data-accordion-content]');
@@ -4753,7 +4758,39 @@ function getDashboardUI(hasDB) {
                   }
               }
           }
-          
+          //DateTime Function
+            function updatePersianDateTime() {
+    const now = new Date();
+
+    const formatter = new Intl.DateTimeFormat('fa-IR', {
+        year: 'numeric',
+        month: 'long',
+        day: 'numeric',
+        hour: '2-digit',
+        minute: '2-digit',
+        second: '2-digit'
+    });
+
+    const parts = formatter.formatToParts(now);
+
+    const map = {};
+    parts.forEach(p => {
+        map[p.type] = p.value;
+    });
+
+  
+      
+        const custom = \`\${map.day} \${map.month} \${map.year} \${map.hour}:\${map.minute}:\${map.second}\`;
+
+    document.getElementById("net-datetime").innerText = custom;
+    
+}
+
+                updatePersianDateTime();
+                setInterval(updatePersianDateTime, 1000);
+
+
+
           function dismissUpdate() {
               const b = document.getElementById('update-alert-banner');
               if (b) {
