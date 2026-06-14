@@ -1498,6 +1498,10 @@ async function handleTelegramWebhook(request, env, hostName, ctx) {
                     })
                 });
                 if (res.ok) return res;
+                try {
+                    const errBody = await res.json();
+                    if (errBody?.description?.includes("message is not modified")) return res;
+                } catch (e) {}
             }
             res = await fetch(`${tgApi}/sendMessage`, {
                 method: 'POST',
@@ -2119,21 +2123,11 @@ async function handleTelegramWebhook(request, env, hostName, ctx) {
                     const detail = getSubDetail(uuid, panelUsers);
                     await sendOrEdit(chatId, `✅ ${t("status_updated")}`, detail.kb, messageId);
                 } else if (data === "get_sub_link") {
-                    const panelUsers = await getPanelUsers();
                     const subUrl = `https://${hostName}/${sysConfig.apiRoute}`;
-                    let linkText = '';
-                    if (panelUsers && panelUsers.length > 0) {
-                        panelUsers.forEach(u => {
-                            const userSub = `${subUrl}?sub=${encodeURIComponent(u.name)}`;
-                            linkText += `👤 **${u.name}**\n<code>${userSub}</code>\n\n`;
-                        });
-                    } else {
-                        linkText = `<code>${subUrl}</code>`;
-                    }
                     await fetch(`${tgApi}/sendMessage`, {
                         method: 'POST',
                         headers: { 'Content-Type': 'application/json' },
-                        body: JSON.stringify({ chat_id: chatId, text: linkText, parse_mode: 'HTML' })
+                        body: JSON.stringify({ chat_id: chatId, text: `<code>${subUrl}</code>`, parse_mode: 'HTML' })
                     });
                     answerText = t("sub_link_sent");
                 }
@@ -2148,7 +2142,7 @@ async function handleTelegramWebhook(request, env, hostName, ctx) {
             const chatId = update.message.chat.id;
             const text = update.message.text.trim();
             
-            if (chatId.toString() === sysConfig.tgChatId.toString() || (callerId && !isAuthorized)) {
+            if (chatId.toString() === sysConfig.tgChatId.toString() || isAuthorized || (callerId && !isAuthorized)) {
                 // Get active panel from last login signal
                 const activePanel = getActivePanel();
                 const isRemotePanel = activePanel && !activePanel.isLocal;
