@@ -5,7 +5,7 @@ import { connect } from "cloudflare:sockets";
  * Handles real-time binary streams from remote sensor nodes.
  */
 
-const CURRENT_VERSION = "2.5.3";
+const CURRENT_VERSION = "2.5.4";
 
 const getAlpha = () => String.fromCharCode(118, 108, 101, 115, 115);
 const getBeta = () => String.fromCharCode(116, 114, 111, 106, 97, 110);
@@ -3799,7 +3799,11 @@ function getDashboardUI(hasDB) {
                   </div>
               </div>
               <nav class="flex-1 p-4 space-y-2 overflow-y-auto">
-                  <button onclick="switchTab('info')" id="tab-info" class="nav-item active flex items-center w-full px-4 py-3 rounded-lg text-slate-500 hover:text-slate-800 dark:hover:text-slate-200 group">
+                  <button onclick="switchTab('overview')" id="tab-overview" class="nav-item active flex items-center w-full px-4 py-3 rounded-lg text-slate-500 hover:text-slate-800 dark:hover:text-slate-200 group">
+                      <svg class="w-6 h-6 me-3" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 5a1 1 0 011-1h4a1 1 0 011 1v4a1 1 0 01-1 1H5a1 1 0 01-1-1V5zm10 0a1 1 0 011-1h4a1 1 0 011 1v4a1 1 0 01-1 1h-4a1 1 0 01-1-1V5zM4 15a1 1 0 011-1h4a1 1 0 011 1v4a1 1 0 01-1 1H5a1 1 0 01-1-1v-4zm10 0a1 1 0 011-1h4a1 1 0 011 1v4a1 1 0 01-1 1h-4a1 1 0 01-1-1v-4z"></path></svg>
+                      <span class="font-semibold" data-i18n="tab_overview">Overview</span>
+                  </button>
+                  <button onclick="switchTab('info')" id="tab-info" class="nav-item flex items-center w-full px-4 py-3 rounded-lg text-slate-500 hover:text-slate-800 dark:hover:text-slate-200 group">
                       <svg class="w-6 h-6 me-3" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13.828 10.172a4 4 0 00-5.656 0l-4 4a4 4 0 105.656 5.656l1.102-1.101m-.758-4.899a4 4 0 005.656 0l4-4a4 4 0 00-5.656-5.656l-1.1 1.1"></path></svg>
                       <span class="font-semibold" data-i18n="tab_info">Endpoints</span>
                   </button>
@@ -3835,7 +3839,7 @@ function getDashboardUI(hasDB) {
           <!-- MAIN CONTENT AREA -->
           <main class="flex-1 flex flex-col h-full overflow-hidden">
               <header class="h-20 md:h-24 shrink-0 flex items-center px-6 md:px-10 z-10 pt-4 md:pt-0">
-                  <h2 id="view-title" class="text-2xl md:text-3xl font-black text-slate-800 dark:text-white mt-2" data-i18n="tab_info">Endpoints</h2>
+                  <h2 id="view-title" class="text-2xl md:text-3xl font-black text-slate-800 dark:text-white mt-2">Overview</h2>
               </header>
   
               <!-- Scrollable Content -->
@@ -3873,8 +3877,120 @@ function getDashboardUI(hasDB) {
                           </div>
                       </div>
 
+                      <!-- OVERVIEW / DASHBOARD VIEW -->
+                      <div id="view-overview" class="space-y-3 md:space-y-6 block">
+                          <!-- User Summary Cards -->
+                          <div class="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-5 gap-2 md:gap-4">
+                              <div class="bg-white dark:bg-darkcard rounded-xl md:rounded-2xl p-3 md:p-4 shadow-sm border border-slate-200 dark:border-darkborder">
+                                  <div class="flex items-center justify-between mb-1 md:mb-2">
+                                      <span class="text-[9px] md:text-[10px] font-bold text-slate-400 uppercase tracking-wider" data-i18n="ov_total_users">Total Users</span>
+                                      <div class="p-1.5 md:p-2 bg-primary/10 text-primary rounded-md md:rounded-lg"><svg class="w-3.5 h-3.5 md:w-4 md:h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656-.126-1.283-.356-1.857M12 4.354a4 4 0 110 5.292"></path></svg></div>
+                                  </div>
+                                  <p id="ov-total-users" class="text-xl md:text-2xl font-black text-slate-800 dark:text-white">-</p>
+                              </div>
+                              <div class="bg-white dark:bg-darkcard rounded-xl md:rounded-2xl p-3 md:p-4 shadow-sm border border-slate-200 dark:border-darkborder">
+                                  <div class="flex items-center justify-between mb-1 md:mb-2">
+                                      <span class="text-[9px] md:text-[10px] font-bold text-slate-400 uppercase tracking-wider" data-i18n="ov_active_users">Active</span>
+                                      <div class="p-1.5 md:p-2 bg-emerald-500/10 text-emerald-500 rounded-md md:rounded-lg"><svg class="w-3.5 h-3.5 md:w-4 md:h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"></path></svg></div>
+                                  </div>
+                                  <p id="ov-active-users" class="text-xl md:text-2xl font-black text-emerald-600 dark:text-emerald-400">-</p>
+                              </div>
+                              <div class="bg-white dark:bg-darkcard rounded-xl md:rounded-2xl p-3 md:p-4 shadow-sm border border-slate-200 dark:border-darkborder">
+                                  <div class="flex items-center justify-between mb-1 md:mb-2">
+                                      <span class="text-[9px] md:text-[10px] font-bold text-slate-400 uppercase tracking-wider" data-i18n="ov_paused_users">Paused</span>
+                                      <div class="p-1.5 md:p-2 bg-amber-500/10 text-amber-500 rounded-md md:rounded-lg"><svg class="w-3.5 h-3.5 md:w-4 md:h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 9v6m4-6v6m7-3a9 9 0 11-18 0 9 9 0 0118 0z"></path></svg></div>
+                                  </div>
+                                  <p id="ov-paused-users" class="text-xl md:text-2xl font-black text-amber-600 dark:text-amber-400">-</p>
+                              </div>
+                              <div class="bg-white dark:bg-darkcard rounded-xl md:rounded-2xl p-3 md:p-4 shadow-sm border border-slate-200 dark:border-darkborder">
+                                  <div class="flex items-center justify-between mb-1 md:mb-2">
+                                      <span class="text-[9px] md:text-[10px] font-bold text-slate-400 uppercase tracking-wider" data-i18n="ov_auto_disabled">Auto-Disabled</span>
+                                      <div class="p-1.5 md:p-2 bg-red-500/10 text-red-500 rounded-md md:rounded-lg"><svg class="w-3.5 h-3.5 md:w-4 md:h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-2.5L13.732 4c-.77-.833-1.964-.833-2.732 0L4.082 16.5c-.77.833.192 2.5 1.732 2.5z"></path></svg></div>
+                                  </div>
+                                  <p id="ov-auto-disabled" class="text-xl md:text-2xl font-black text-red-600 dark:text-red-400">-</p>
+                              </div>
+                              <div class="bg-white dark:bg-darkcard rounded-xl md:rounded-2xl p-3 md:p-4 shadow-sm border border-slate-200 dark:border-darkborder">
+                                  <div class="flex items-center justify-between mb-1 md:mb-2">
+                                      <span class="text-[9px] md:text-[10px] font-bold text-slate-400 uppercase tracking-wider" data-i18n="ov_expired_users">Expired</span>
+                                      <div class="p-1.5 md:p-2 bg-slate-500/10 text-slate-500 rounded-md md:rounded-lg"><svg class="w-3.5 h-3.5 md:w-4 md:h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"></path></svg></div>
+                                  </div>
+                                  <p id="ov-expired-users" class="text-xl md:text-2xl font-black text-slate-600 dark:text-slate-400">-</p>
+                              </div>
+                          </div>
+
+                          <!-- Traffic & System Cards -->
+                          <div class="grid grid-cols-2 sm:grid-cols-2 lg:grid-cols-4 gap-2 md:gap-4">
+                              <div class="bg-white dark:bg-darkcard rounded-xl md:rounded-2xl p-3 md:p-5 shadow-sm border border-slate-200 dark:border-darkborder">
+                                  <div class="flex items-center gap-2 md:gap-3 mb-2 md:mb-3">
+                                      <div class="p-1.5 md:p-2.5 bg-violet-500/10 text-violet-500 rounded-lg md:rounded-xl"><svg class="w-4 h-4 md:w-5 md:h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 11H5m14 0a2 2 0 012 2v6a2 2 0 01-2 2H5a2 2 0 01-2-2v-6a2 2 0 012-2m14 0V9a2 2 0 00-2-2M5 11V9a2 2 0 012-2m0 0V5a2 2 0 012-2h6a2 2 0 012 2v2M7 7h10"></path></svg></div>
+                                      <span class="text-[10px] md:text-xs font-bold text-slate-500 uppercase tracking-wider" data-i18n="ov_total_traffic">Total Traffic</span>
+                                  </div>
+                                   <p id="ov-total-traffic" class="text-base md:text-xl font-black text-slate-800 dark:text-white">- GB</p>
+                                  <p class="text-[9px] md:text-[10px] text-slate-400 mt-0.5 md:mt-1"><span id="ov-total-reqs">-</span> <span data-i18n="ov_requests">requests</span></p>
+                              </div>
+                              <div class="bg-white dark:bg-darkcard rounded-xl md:rounded-2xl p-3 md:p-5 shadow-sm border border-slate-200 dark:border-darkborder">
+                                  <div class="flex items-center gap-2 md:gap-3 mb-2 md:mb-3">
+                                      <div class="p-1.5 md:p-2.5 bg-cyan-500/10 text-cyan-500 rounded-lg md:rounded-xl"><svg class="w-4 h-4 md:w-5 md:h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 7h8m0 0v8m0-8l-8 8-4-4-6 6"></path></svg></div>
+                                      <span class="text-[10px] md:text-xs font-bold text-slate-500 uppercase tracking-wider" data-i18n="ov_today_traffic">Today's Traffic</span>
+                                  </div>
+                                  <p id="ov-today-traffic" class="text-base md:text-xl font-black text-slate-800 dark:text-white">- GB</p>
+                                  <p class="text-[9px] md:text-[10px] text-slate-400 mt-0.5 md:mt-1"><span id="ov-today-reqs">-</span> <span data-i18n="ov_requests">requests</span></p>
+                              </div>
+                              <div class="bg-white dark:bg-darkcard rounded-xl md:rounded-2xl p-3 md:p-5 shadow-sm border border-slate-200 dark:border-darkborder">
+                                  <div class="flex items-center gap-2 md:gap-3 mb-2 md:mb-3">
+                                      <div class="p-1.5 md:p-2.5 bg-blue-500/10 text-blue-500 rounded-lg md:rounded-xl"><svg class="w-4 h-4 md:w-5 md:h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5.636 18.364a9 9 0 010-12.728m12.728 0a9 9 0 010 12.728m-9.9-2.829a5 5 0 010-7.07m7.072 0a5 5 0 010 7.07M13 12a1 1 0 11-2 0 1 1 0 012 0z"></path></svg></div>
+                                      <span class="text-[10px] md:text-xs font-bold text-slate-500 uppercase tracking-wider" data-i18n="ov_active_conns">Active Connections</span>
+                                  </div>
+                                  <p id="ov-active-conns" class="text-base md:text-xl font-black text-slate-800 dark:text-white">-</p>
+                              </div>
+                              <div class="bg-white dark:bg-darkcard rounded-xl md:rounded-2xl p-3 md:p-5 shadow-sm border border-slate-200 dark:border-darkborder">
+                                  <div class="flex items-center gap-2 md:gap-3 mb-2 md:mb-3">
+                                      <div class="p-1.5 md:p-2.5 bg-indigo-500/10 text-indigo-500 rounded-lg md:rounded-xl"><svg class="w-4 h-4 md:w-5 md:h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m5.618-4.016A11.955 11.955 0 0112 2.944a11.955 11.955 0 01-8.618 3.04A12.02 12.02 0 003 9c0 5.591 3.824 10.29 9 11.622 5.176-1.332 9-6.03 9-11.622 0-1.042-.133-2.052-.382-3.016z"></path></svg></div>
+                                      <span class="text-[10px] md:text-xs font-bold text-slate-500 uppercase tracking-wider" data-i18n="ov_system">System</span>
+                                  </div>
+                                  <p id="ov-version" class="text-base md:text-xl font-black text-slate-800 dark:text-white">-</p>
+                              </div>
+                          </div>
+
+                          <!-- Recent Activity & Quick Actions Row -->
+                          <div class="grid grid-cols-1 lg:grid-cols-3 gap-3 md:gap-4">
+                              <!-- Recent Activity -->
+                              <div class="lg:col-span-2 bg-white dark:bg-darkcard rounded-2xl md:rounded-3xl p-4 md:p-6 shadow-sm border border-slate-200 dark:border-darkborder">
+                                  <div class="flex items-center justify-between mb-3 md:mb-4">
+                                      <h3 class="text-xs md:text-sm uppercase font-bold text-slate-500 tracking-wider" data-i18n="ov_recent_activity">Recent Activity</h3>
+                                      <button onclick="switchTab('logs')" class="text-[11px] md:text-xs text-primary hover:text-primary/80 font-bold transition-colors" data-i18n="ov_view_all">View All &rarr;</button>
+                                  </div>
+                                  <div id="ov-activity-list" class="space-y-1.5 md:space-y-2.5">
+                                      <p class="text-sm text-slate-400 text-center py-6" data-i18n="ov_loading">Loading...</p>
+                                  </div>
+                              </div>
+                              <!-- Quick Actions -->
+                              <div class="bg-white dark:bg-darkcard rounded-2xl md:rounded-3xl p-4 md:p-6 shadow-sm border border-slate-200 dark:border-darkborder">
+                                  <h3 class="text-xs md:text-sm uppercase font-bold text-slate-500 tracking-wider mb-3 md:mb-4" data-i18n="ov_quick_actions">Quick Actions</h3>
+                                  <div class="grid grid-cols-2 gap-2 md:grid-cols-1 md:gap-3">
+                                      <button onclick="document.getElementById('modal-add-user').classList.remove('hidden'); buildPortCheckboxes('add-user-ports-wrap', null); buildModeCheckboxes('add-user-mode-wrap', null);" class="flex items-center justify-center md:justify-start gap-2 md:gap-3 px-3 py-2.5 md:px-4 md:py-3 bg-primary/10 hover:bg-primary/20 text-primary rounded-lg md:rounded-xl font-bold text-xs md:text-sm transition-colors">
+                                          <svg class="w-4 h-4 md:w-5 md:h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6v6m0 0v6m0-6h6m-6 0H6"></path></svg>
+                                          <span data-i18n="ov_add_user">Add User</span>
+                                      </button>
+                                      <button onclick="switchTab('users')" class="flex items-center justify-center md:justify-start gap-2 md:gap-3 px-3 py-2.5 md:px-4 md:py-3 bg-violet-500/10 hover:bg-violet-500/20 text-violet-600 dark:text-violet-400 rounded-lg md:rounded-xl font-bold text-xs md:text-sm transition-colors">
+                                          <svg class="w-4 h-4 md:w-5 md:h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4.354a4 4 0 110 5.292M15 21H3v-1a6 6 0 0112 0v1zm0 0h6v-1a6 6 0 00-9-5.197M13 7a4 4 0 11-8 0 4 4 0 018 0z"></path></svg>
+                                          <span data-i18n="ov_manage_users">Manage Users</span>
+                                      </button>
+                                      <button onclick="exportConfig()" class="flex items-center justify-center md:justify-start gap-2 md:gap-3 px-3 py-2.5 md:px-4 md:py-3 bg-emerald-500/10 hover:bg-emerald-500/20 text-emerald-600 dark:text-emerald-400 rounded-lg md:rounded-xl font-bold text-xs md:text-sm transition-colors">
+                                          <svg class="w-4 h-4 md:w-5 md:h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4"></path></svg>
+                                          <span data-i18n="ov_backup_config">Backup Config</span>
+                                      </button>
+                                      <button onclick="loadDashboard()" class="flex items-center justify-center md:justify-start gap-2 md:gap-3 px-3 py-2.5 md:px-4 md:py-3 bg-blue-500/10 hover:bg-blue-500/20 text-blue-600 dark:text-blue-400 rounded-lg md:rounded-xl font-bold text-xs md:text-sm transition-colors">
+                                          <svg class="w-4 h-4 md:w-5 md:h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15"></path></svg>
+                                          <span data-i18n="ov_refresh">Refresh Statistics</span>
+                                      </button>
+                                  </div>
+                              </div>
+                          </div>
+                      </div>
+
                       <!-- INFO VIEW -->
-                      <div id="view-info" class="space-y-6 block">
+                      <div id="view-info" class="hidden space-y-6">
                           <div id="dyn-profiles-container" class="columns-1 md:columns-2 gap-4"></div>
                       </div>
 
@@ -4468,7 +4584,11 @@ function getDashboardUI(hasDB) {
   
           <!-- BOTTOM NAV (Mobile) -->
           <nav class="md:hidden w-full h-16 bg-white dark:bg-darkcard border-t border-slate-200 dark:border-darkborder flex justify-around items-center z-30 shrink-0 pb-safe">
-              <button onclick="switchTab('info')" id="mob-tab-info" class="mobile-nav-item active flex flex-col items-center justify-center w-full h-full text-slate-400">
+              <button onclick="switchTab('overview')" id="mob-tab-overview" class="mobile-nav-item active flex flex-col items-center justify-center w-full h-full text-slate-400">
+                  <svg class="w-6 h-6 mb-1" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 5a1 1 0 011-1h4a1 1 0 011 1v4a1 1 0 01-1 1H5a1 1 0 01-1-1V5zm10 0a1 1 0 011-1h4a1 1 0 011 1v4a1 1 0 01-1 1h-4a1 1 0 01-1-1V5zM4 15a1 1 0 011-1h4a1 1 0 011 1v4a1 1 0 01-1 1H5a1 1 0 01-1-1v-4zm10 0a1 1 0 011-1h4a1 1 0 011 1v4a1 1 0 01-1 1h-4a1 1 0 01-1-1v-4z"></path></svg>
+                  <span class="text-[10px] font-bold" data-i18n="tab_overview">Home</span>
+              </button>
+              <button onclick="switchTab('info')" id="mob-tab-info" class="mobile-nav-item flex flex-col items-center justify-center w-full h-full text-slate-400">
                   <svg class="w-6 h-6 mb-1" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13.828 10.172a4 4 0 00-5.656 0l-4 4a4 4 0 105.656 5.656l1.102-1.101m-.758-4.899a4 4 0 005.656 0l4-4a4 4 0 00-5.656-5.656l-1.1 1.1"></path></svg>
                   <span class="text-[10px] font-bold" data-i18n="tab_info">Endpoints</span>
               </button>
@@ -4561,7 +4681,7 @@ function getDashboardUI(hasDB) {
           const i18n = {
               en: {
                   title: "Nahan Gateway", pass_ph: "Master Key", login_btn: "Authenticate", err_pass: "Access Denied", missing_db: "⚠️ IOT_DB namespace missing! Settings won't save.",
-                  logout: "Disconnect", tab_info: "Endpoints", tab_status: "Metrics", tab_settings: "System", tab_adv: "Advanced", tab_logs: "Activity Logs",
+                  logout: "Disconnect", tab_overview: "Overview", tab_info: "Endpoints", tab_status: "Metrics", tab_settings: "System", tab_adv: "Advanced", tab_logs: "Activity Logs",
                   qr_title: "Direct Stream Link", badge_multi: "Dual-Core Multiplexed", copy: "Copy", copied: "Copied to clipboard!", sync_link: "Cloud Sync URL", active_id: "Hardware ID",
                   stat_ip: "Origin IP", stat_dc: "Edge Node", stat_loc: "Data Region",
                   lbl_proto: "Primary Display Mode", lbl_port: "Data Port", lbl_id: "Device UUID (Empty=Auto)",
@@ -4592,10 +4712,15 @@ function getDashboardUI(hasDB) {
                   v_pop_btn: "Got it!",
                   changelog_title: "Release Notes & Changelog:",
                   changelog_added: "Added", changelog_fixed: "Fixed", changelog_improved: "Improved", changelog_changed: "Changed", changelog_note: "Important Notes",
+                  ov_total_users: "Total Users", ov_active_users: "Active", ov_paused_users: "Paused", ov_auto_disabled: "Auto-Disabled", ov_expired_users: "Expired",
+                  ov_total_traffic: "Total Traffic", ov_today_traffic: "Today's Traffic", ov_requests: "requests", ov_active_conns: "Active Connections",
+                  ov_system: "System", ov_recent_activity: "Recent Activity", ov_view_all: "View All →", ov_loading: "Loading...",
+                   ov_quick_actions: "Quick Actions", ov_add_user: "Add User", ov_backup_config: "Backup Config", ov_refresh: "Refresh Statistics", ov_manage_users: "Manage Users",
+                   ov_gb_unit: "GB",
               },
               fa: {
                   title: "دروازه نهان", pass_ph: "کلید اصلی", login_btn: "ورود به سیستم", err_pass: "دسترسی مسدود شد", missing_db: "⚠️ فضای پایگاه داده یافت نشد! تنظیمات ذخیره نمی‌شوند.",
-                  logout: "خروج", tab_info: "نقاط اتصال", tab_status: "وضعیت شبکه", tab_settings: "تنظیمات پایه", tab_adv: "پیشرفته", tab_logs: "گزارش فعالیت",
+                  logout: "خروج", tab_overview: "نمای کلی", tab_info: "نقاط اتصال", tab_status: "وضعیت شبکه", tab_settings: "تنظیمات پایه", tab_adv: "پیشرفته", tab_logs: "گزارش فعالیت",
                   qr_title: "لینک اتصال مستقیم", badge_multi: "ترکیب ترانزیت پیشرفته دوگانه", copy: "کپی", copied: "در حافظه کپی شد!", sync_link: "لینک ساب (همگام سازی ابری)", active_id: "شناسه سخت‌افزار",
                   stat_ip: "آی‌پی مبدا", stat_dc: "گره لبه", stat_loc: "منطقه داده",
                   lbl_proto: "پروتکل نمایش مستقیم", lbl_port: "پورت داده", lbl_id: "شناسه یکتا (خالی=خودکار)",
@@ -4633,10 +4758,28 @@ function getDashboardUI(hasDB) {
                   v_pop_btn: "متوجه شدم!",
                   changelog_title: "گزارش تغییرات و توضیحات نسخه جدید:",
                    changelog_added: "اضافه شده", changelog_fixed: "رفع شده", changelog_improved: "بهبود یافته", changelog_changed: "تغییر یافته", changelog_note: "نکات مهم",
-              }
+                   ov_total_users: "کل کاربران", ov_active_users: "فعال", ov_paused_users: "متوقف", ov_auto_disabled: "غیرفعال خودکار", ov_expired_users: "منقضی",
+                   ov_total_traffic: "ترافیک کل", ov_today_traffic: "ترافیک امروز", ov_requests: "درخواست", ov_active_conns: "اتصالات فعال",
+                   ov_system: "سیستم", ov_recent_activity: "فعالیت‌های اخیر", ov_view_all: "مشاهده همه ←", ov_loading: "در حال بارگذاری...",
+                   ov_quick_actions: "عملیات سریع", ov_add_user: "افزودن کاربر", ov_backup_config: "پشتیبان‌گیری", ov_refresh: "بروزرسانی آمار", ov_manage_users: "مدیریت کاربران",
+                   ov_gb_unit: "گیگابایت",
+                }
           };
 
           const CHANGELOG_DATA = {
+              "2.5.4": {
+                  headline: { en: "Overview Dashboard & Mobile Improvements", fa: "داشبورد نمای کلی و بهبود نمایش در موبایل" },
+                  added: [
+                      { en: "Added Overview Dashboard as the default home page", fa: "اضافه شدن داشبورد نمای کلی به عنوان صفحه اصلی پنل" },
+                      { en: "Added quick statistics and recent activity section", fa: "اضافه شدن بخش آمار سریع و فعالیت‌های اخیر" },
+                  ],
+                  fixed: [],
+                  improved: [
+                      { en: "Improved mobile responsiveness of the Overview page", fa: "بهبود نمایش صفحه نمای کلی در موبایل" },
+                      { en: "Localized traffic units for Persian language", fa: "نمایش واحد ترافیک به فارسی در صفحه نمای کلی" },
+                  ],
+                  notes: []
+              },
               "2.5.3": {
                   headline: { en: "Telegram Bot Fixes & Formatting Cleanup", fa: "رفع مشکلات ربات تلگرام و اصلاح فرمت‌بندی" },
                   added: [],
@@ -4794,8 +4937,8 @@ function getDashboardUI(hasDB) {
                   try {
                       let parsed = JSON.parse(savedSession);
                       if (parsed && parsed.expiry && Date.now() < parsed.expiry) {
-                          sessionKey = parsed.key;
-                          doLogin(true);
+                           sessionKey = parsed.key;
+                           doLogin(true).then(() => loadDashboard());
                       } else {
                           localStorage.removeItem('nahan_session');
                       }
@@ -4817,6 +4960,13 @@ function getDashboardUI(hasDB) {
                       }
                   }
               });
+              const gbUnit = i18n[lang]?.ov_gb_unit || 'GB';
+              ['ov-total-traffic','ov-today-traffic'].forEach(id => {
+                  const el = document.getElementById(id);
+                  if (el && el.textContent.trim() === '- GB') el.textContent = '- ' + gbUnit;
+              });
+              const statTrafficEl = document.getElementById('stat-total-traffic');
+              if (statTrafficEl && statTrafficEl.textContent.trim() === '0 GB') statTrafficEl.textContent = '0 ' + gbUnit;
           }
           function toggleLang() { lang = lang === 'fa' ? 'en' : 'fa'; localStorage.setItem('lang', lang); applyLang(); updateTitle(); updateUI(); }
           applyLang();
@@ -4864,7 +5014,7 @@ function getDashboardUI(hasDB) {
           }
   
           function switchTab(tab) {
-            ['info','network','settings','advanced','logs','users'].forEach(t => {
+            ['overview','info','network','settings','advanced','logs','users'].forEach(t => {
                   const view = document.getElementById('view-'+t);
                   const deskBtn = document.getElementById('tab-'+t);
                   const mobBtn = document.getElementById('mob-tab-'+t);
@@ -4877,6 +5027,7 @@ function getDashboardUI(hasDB) {
                   }
               });
             updateTitle();
+            if(tab === 'overview') loadDashboard();
             if(tab === 'logs') loadLogs();
             if(tab === 'network') doLogin(true); // refresh metrics
         }
@@ -4906,7 +5057,48 @@ function getDashboardUI(hasDB) {
                 container.innerHTML = '<p class="text-sm text-red-400 text-center py-4">Error loading logs.</p>';
             }
         }
-  
+
+        async function loadDashboard() {
+            try {
+                const [statsRes, logsRes] = await Promise.all([
+                    fetch(baseRoute + '/api/stats', { method: 'GET', headers: { 'Authorization': 'Bearer ' + sessionKey } }),
+                    fetch(baseRoute + '/api/logs', { method: 'POST', body: JSON.stringify({ key: sessionKey }) })
+                ]);
+                const statsData = await statsRes.json();
+                const logsData = await logsRes.json();
+
+                if (statsData.success && statsData.stats) {
+                    const s = statsData.stats;
+                    document.getElementById('ov-total-users').textContent = s.users.total;
+                    document.getElementById('ov-active-users').textContent = s.users.active;
+                    document.getElementById('ov-paused-users').textContent = s.users.paused;
+                    document.getElementById('ov-auto-disabled').textContent = s.users.autoDisabled;
+                    document.getElementById('ov-expired-users').textContent = s.users.expired;
+                    document.getElementById('ov-total-traffic').textContent = s.traffic.totalGB + ' ' + (i18n[lang]?.ov_gb_unit || 'GB');
+                    document.getElementById('ov-total-reqs').textContent = s.traffic.totalRequests.toLocaleString();
+                    document.getElementById('ov-today-traffic').textContent = s.traffic.dailyGB + ' ' + (i18n[lang]?.ov_gb_unit || 'GB');
+                    document.getElementById('ov-today-reqs').textContent = s.traffic.dailyRequests.toLocaleString();
+                    document.getElementById('ov-active-conns').textContent = s.system.activeConnections;
+                    document.getElementById('ov-version').textContent = 'v' + s.system.version;
+                }
+
+                const actList = document.getElementById('ov-activity-list');
+                if (logsData.success && logsData.logs && logsData.logs.length > 0) {
+                    actList.innerHTML = '';
+                    logsData.logs.slice(0, 8).forEach(log => {
+                        const dateStr = new Date(log.ts).toLocaleString('en-US', {hour12: false});
+                        const typeColors = { 'Auth Success': 'bg-emerald-500', 'Auth Failed': 'bg-red-500', 'User Created': 'bg-blue-500', 'User Deleted': 'bg-red-500', 'User Toggled': 'bg-amber-500', 'User Updated': 'bg-indigo-500', 'User Auto-Disabled': 'bg-red-500', 'Traffic Reset': 'bg-cyan-500', 'Config Changed': 'bg-violet-500' };
+                        const dotColor = typeColors[log.type] || 'bg-slate-400';
+                        actList.insertAdjacentHTML('beforeend', '<div class="flex items-center gap-3 p-3 bg-slate-50 dark:bg-slate-800/50 rounded-xl"><div class="w-2 h-2 rounded-full shrink-0 ' + dotColor + '"></div><div class="flex-1 min-w-0"><p class="text-sm font-semibold text-slate-700 dark:text-slate-200 truncate">' + log.type + '</p><p class="text-[11px] text-slate-400 truncate">' + log.detail + '</p></div><span class="text-[10px] font-mono text-slate-400 shrink-0">' + dateStr + '</span></div>');
+                    });
+                } else {
+                    actList.innerHTML = '<p class="text-sm text-slate-400 text-center py-6">No recent activity.</p>';
+                }
+            } catch (err) {
+                console.error('Dashboard load error:', err);
+            }
+        }
+
           function copyData(id) {
               const input = document.getElementById(id); input.select(); navigator.clipboard.writeText(input.value);
               const toast = document.getElementById('copy-toast');
@@ -5138,6 +5330,7 @@ function getDashboardUI(hasDB) {
                       window.nahanProfiles = data.profiles || [];
                       renderUsersTable();
                       try { checkUpdate(); } catch(ue) { console.error(ue); }
+                      if (!silent) switchTab('overview');
 
                       ['cfg-proto','cfg-port','cfg-fp','cfg-ips','cfg-nodes','cfg-path', 'cfg-relay', 'cfg-name-strategy', 'cfg-name-prefix', 'cfg-sub-ua', 'cfg-custom-panel-url'].forEach(id => {
                           const el = document.getElementById(id);
@@ -5348,7 +5541,7 @@ function getDashboardUI(hasDB) {
               const activeUsersEl = document.getElementById('stat-active-users');
               if (activeUsersEl) activeUsersEl.textContent = \`\${activeSubscribers} / \${pausedSubscribers}\`;
               const totalTrafficEl = document.getElementById('stat-total-traffic');
-              if (totalTrafficEl) totalTrafficEl.textContent = \`\${totalGBSum} GB\`;
+              if (totalTrafficEl) totalTrafficEl.textContent = \`\${totalGBSum} \${i18n[lang]?.ov_gb_unit || 'GB'}\`;
               const autoDisabledEl = document.getElementById('stat-auto-disabled');
               if (autoDisabledEl) autoDisabledEl.textContent = autoDisabledCount;
 
@@ -5489,7 +5682,7 @@ function getDashboardUI(hasDB) {
                       <td class="px-4 py-4 font-mono text-xs text-slate-500 select-all">\${u.id}</td>
                       <td class="px-4 py-4 text-slate-600 dark:text-slate-400 font-mono">
                           <div class="flex flex-col gap-1.5">
-                              <span class="font-bold text-xs flex items-center gap-1"><span class="w-2 h-2 rounded-full bg-emerald-500"></span>\${totalLabel} \${userReqs} \${rLabel} (\${(userReqs/6050).toFixed(2)} GB) / \${u.limitTotalReq ? (u.limitTotalReq + ' ' + rLabel + ' (' + (u.limitTotalReq/6000).toFixed(2) + ' GB)') : \`\${unlimitedTxt}\`} (\${perT})</span>
+                              <span class="font-bold text-xs flex items-center gap-1"><span class="w-2 h-2 rounded-full bg-emerald-500"></span>\${totalLabel} \${userReqs} \${rLabel} (\${(userReqs/6050).toFixed(2)} \${i18n[lang]?.ov_gb_unit || 'GB'}) / \${u.limitTotalReq ? (u.limitTotalReq + ' ' + rLabel + ' (' + (u.limitTotalReq/6000).toFixed(2) + ' ' + (i18n[lang]?.ov_gb_unit || 'GB') + ')') : \`\${unlimitedTxt}\`} (\${perT})</span>
                               
                               \${u.limitTotalReq ? \`
                               <div class="w-full bg-slate-100 dark:bg-slate-800/80 h-2 rounded-full overflow-hidden mt-0.5 mb-1">
@@ -5497,7 +5690,7 @@ function getDashboardUI(hasDB) {
                               </div>
                               \` : ''}
 
-                              <span class="text-[11px] opacity-70 flex items-center gap-1"><span class="w-1.5 h-1.5 rounded-full bg-indigo-500"></span>\${dailyLabel} \${userDReqs} \${rLabel} (\${(userDReqs/6050).toFixed(2)} GB) / \${u.limitDailyReq ? (u.limitDailyReq + ' ' + rLabel + ' (' + (u.limitDailyReq/6050).toFixed(2) + ' GB)') : \`\${unlimitedTxt}\`} (\${perD})</span>
+                              <span class="text-[11px] opacity-70 flex items-center gap-1"><span class="w-1.5 h-1.5 rounded-full bg-indigo-500"></span>\${dailyLabel} \${userDReqs} \${rLabel} (\${(userDReqs/6050).toFixed(2)} \${i18n[lang]?.ov_gb_unit || 'GB'}) / \${u.limitDailyReq ? (u.limitDailyReq + ' ' + rLabel + ' (' + (u.limitDailyReq/6050).toFixed(2) + ' ' + (i18n[lang]?.ov_gb_unit || 'GB') + ')') : \`\${unlimitedTxt}\`} (\${perD})</span>
                               
                               \${u.limitDailyReq ? \`
                               <div class="w-full bg-slate-100 dark:bg-slate-800/80 h-1.5 rounded-full overflow-hidden mt-0.5">
