@@ -1450,6 +1450,22 @@ async function handleTelegramWebhook(request, env, hostName, ctx) {
         const adminId = sysConfig.tgAdminId || sysConfig.tgChatId;
         const isAuthorized = adminId && callerId === adminId.toString();
 
+        if (!isAuthorized) {
+            const chatId = update.callback_query?.message?.chat?.id || update.message?.chat?.id;
+            if (chatId) {
+                await fetch(`${tgApi}/sendMessage`, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ 
+                        chat_id: chatId, 
+                        text: "❌ *شما دسترسی به این ربات را ندارید.*\n\nیوزر آیدی شما جهت اضافه کردن به لیست ادمین ها: `" + (callerId || "Unknown") + "`", 
+                        parse_mode: 'Markdown' 
+                    })
+                });
+            }
+            return new Response(JSON.stringify({ success: false, error: "Unauthorized" }), { status: 200 });
+        }
+
         let tgState = {};
         try {
             const storedState = await d1Get(env, "tg_bot_state");
