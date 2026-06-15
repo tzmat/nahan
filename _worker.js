@@ -4715,7 +4715,8 @@ function getDashboardUI(hasDB) {
                   ov_total_users: "Total Users", ov_active_users: "Active", ov_paused_users: "Paused", ov_auto_disabled: "Auto-Disabled", ov_expired_users: "Expired",
                   ov_total_traffic: "Total Traffic", ov_today_traffic: "Today's Traffic", ov_requests: "requests", ov_active_conns: "Active Connections",
                   ov_system: "System", ov_recent_activity: "Recent Activity", ov_view_all: "View All →", ov_loading: "Loading...",
-                  ov_quick_actions: "Quick Actions", ov_add_user: "Add User", ov_backup_config: "Backup Config", ov_refresh: "Refresh Statistics", ov_manage_users: "Manage Users",
+                   ov_quick_actions: "Quick Actions", ov_add_user: "Add User", ov_backup_config: "Backup Config", ov_refresh: "Refresh Statistics", ov_manage_users: "Manage Users",
+                   ov_gb_unit: "GB",
               },
               fa: {
                   title: "دروازه نهان", pass_ph: "کلید اصلی", login_btn: "ورود به سیستم", err_pass: "دسترسی مسدود شد", missing_db: "⚠️ فضای پایگاه داده یافت نشد! تنظیمات ذخیره نمی‌شوند.",
@@ -4761,7 +4762,8 @@ function getDashboardUI(hasDB) {
                    ov_total_traffic: "ترافیک کل", ov_today_traffic: "ترافیک امروز", ov_requests: "درخواست", ov_active_conns: "اتصالات فعال",
                    ov_system: "سیستم", ov_recent_activity: "فعالیت‌های اخیر", ov_view_all: "مشاهده همه ←", ov_loading: "در حال بارگذاری...",
                    ov_quick_actions: "عملیات سریع", ov_add_user: "افزودن کاربر", ov_backup_config: "پشتیبان‌گیری", ov_refresh: "بروزرسانی آمار", ov_manage_users: "مدیریت کاربران",
-               }
+                   ov_gb_unit: "گیگابایت",
+                }
           };
 
           const CHANGELOG_DATA = {
