@@ -7177,7 +7177,7 @@ function buildPortCheckboxes(wrapId, selectedPorts) {
               const b = document.getElementById('update-alert-banner');
               if (b) {
                   b.classList.remove('flex');
-                  b.classList.add('hidden');
+                  b.classList.add('hidden'); 
               }
           }
 
