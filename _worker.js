@@ -1586,13 +1586,34 @@ async function handleAuth(request, hostName, ctx, env) {
 async function handleConfigSync(request, env, ctx) {
     try {
         const data = await request.json();
+        
         const isAuthorized = (data.key === sysConfig.masterKey) || 
                              (data.oldKey && data.oldKey === sysConfig.masterKey) || 
                              (sysConfig.masterKey === "admin");
         if (!isAuthorized) return new Response(JSON.stringify({ success: false }), { status: 401 });
+
+        if (data.fromMaster) {
+            const protectedFields = {
+                allowSyncWorker: sysConfig.allowSyncWorker,
+                tgToken: sysConfig.tgToken,
+                tgChatId: sysConfig.tgChatId,
+                tgAdminId: sysConfig.tgAdminId,
+                cfAccountId: sysConfig.cfAccountId,
+				cfWorkerName: sysConfig.cfWorkerName,
+                cfApiToken: sysConfig.cfApiToken
+            };
+            
+            Object.keys(protectedFields).forEach(field => {
+                if (data.config && protectedFields[field] !== undefined) {
+                    data.config[field] = protectedFields[field];
+                }
+            });
+        }
+
         if (data.fromMaster && !sysConfig.allowSyncWorker) {
-    return new Response(JSON.stringify({ success: false, error: "Sync not allowed" }), { status: 403 });
-}
+            return new Response(JSON.stringify({ success: false, error: "Sync not allowed" }), { status: 403 });
+        }
+
         if (!env.IOT_DB) return new Response(JSON.stringify({ success: false, msg: "DB Error" }), { status: 400 });
         
         let nextConfig = sysConfig;
@@ -1987,22 +2008,6 @@ async function handleTelegramWebhook(request, env, hostName, ctx) {
         const callerId = update.callback_query?.from?.id?.toString() || update.message?.from?.id?.toString();
         const adminId = sysConfig.tgAdminId || sysConfig.tgChatId;
         const isAuthorized = adminId && callerId === adminId.toString();
-
-        if (!isAuthorized) {
-            const chatId = update.callback_query?.message?.chat?.id || update.message?.chat?.id;
-            if (chatId) {
-                await fetch(`${tgApi}/sendMessage`, {
-                    method: 'POST',
-                    headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify({ 
-                        chat_id: chatId, 
-                        text: "❌ *شما دسترسی به این ربات را ندارید.*\n\nیوزر آیدی شما جهت اضافه کردن به لیست ادمین ها: `" + (callerId || "Unknown") + "`", 
-                        parse_mode: 'Markdown' 
-                    })
-                });
-            }
-            return new Response(JSON.stringify({ success: false, error: "Unauthorized" }), { status: 200 });
-        }
 
         let tgState = {};
         try {
