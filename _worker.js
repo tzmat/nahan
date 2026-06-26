@@ -3,6 +3,7 @@ import { connect } from "cloudflare:sockets";
 /* 
  * Project Nahan (نهان) - IoT Device Telemetry Gateway
  * Handles real-time binary streams from remote sensor nodes.
+ * node managemant problems fixed. From now on, sensitive information will not be sent.
  */
 
 const CURRENT_VERSION = "2.9.2";
