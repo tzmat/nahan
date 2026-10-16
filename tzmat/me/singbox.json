@@ -88,7 +88,7 @@
       "password": "acd5787a-7a32-4c28-b093-c1fbebcaa42b",
       "transport": {
         "type": "ws",
-        "path": "/img/5a057741b70d",
+        "path": "/comic/5a057741b70d",
         "headers": {
           "Host": "n.shay.dpdns.org"
         }
@@ -115,7 +115,7 @@
       "password": "acd5787a-7a32-4c28-b093-c1fbebcaa42b",
       "transport": {
         "type": "ws",
-        "path": "/event/team/thread/5a057741b70d",
+        "path": "/upload/5a057741b70d",
         "headers": {
           "Host": "n.shay.dpdns.org"
         }
@@ -142,7 +142,7 @@
       "password": "acd5787a-7a32-4c28-b093-c1fbebcaa42b",
       "transport": {
         "type": "ws",
-        "path": "/bd/sale/5a057741b70d",
+        "path": "/my/shop/5a057741b70d",
         "headers": {
           "Host": "n.shay.dpdns.org"
         }
@@ -169,7 +169,7 @@
       "password": "acd5787a-7a32-4c28-b093-c1fbebcaa42b",
       "transport": {
         "type": "ws",
-        "path": "/activity/m/5a057741b70d",
+        "path": "/comic/5a057741b70d",
         "headers": {
           "Host": "n.shay.dpdns.org"
         }
@@ -196,7 +196,7 @@
       "password": "acd5787a-7a32-4c28-b093-c1fbebcaa42b",
       "transport": {
         "type": "ws",
-        "path": "/page/messages/view/5a057741b70d",
+        "path": "/source/favs/5a057741b70d",
         "headers": {
           "Host": "n.shay.dpdns.org"
         }
@@ -223,7 +223,7 @@
       "password": "acd5787a-7a32-4c28-b093-c1fbebcaa42b",
       "transport": {
         "type": "ws",
-        "path": "/contact/5a057741b70d",
+        "path": "/torrent/movie/u/5a057741b70d",
         "headers": {
           "Host": "n.shay.dpdns.org"
         }
@@ -250,7 +250,7 @@
       "password": "acd5787a-7a32-4c28-b093-c1fbebcaa42b",
       "transport": {
         "type": "ws",
-        "path": "/project/5a057741b70d",
+        "path": "/share/5a057741b70d",
         "headers": {
           "Host": "n.shay.dpdns.org"
         }
@@ -277,7 +277,7 @@
       "password": "acd5787a-7a32-4c28-b093-c1fbebcaa42b",
       "transport": {
         "type": "ws",
-        "path": "/go.php/5a057741b70d",
+        "path": "/products/ja/5a057741b70d",
         "headers": {
           "Host": "n.shay.dpdns.org"
         }
@@ -304,7 +304,7 @@
       "password": "acd5787a-7a32-4c28-b093-c1fbebcaa42b",
       "transport": {
         "type": "ws",
-        "path": "/activity/payment/items/5a057741b70d",
+        "path": "/data/courses/library/5a057741b70d",
         "headers": {
           "Host": "n.shay.dpdns.org"
         }
@@ -331,7 +331,7 @@
       "password": "acd5787a-7a32-4c28-b093-c1fbebcaa42b",
       "transport": {
         "type": "ws",
-        "path": "/directory/5a057741b70d",
+        "path": "/code/about/search/5a057741b70d",
         "headers": {
           "Host": "n.shay.dpdns.org"
         }
@@ -358,7 +358,7 @@
       "password": "acd5787a-7a32-4c28-b093-c1fbebcaa42b",
       "transport": {
         "type": "ws",
-        "path": "/pay/5a057741b70d",
+        "path": "/game/5a057741b70d",
         "headers": {
           "Host": "n.shay.dpdns.org"
         }
@@ -385,7 +385,7 @@
       "password": "acd5787a-7a32-4c28-b093-c1fbebcaa42b",
       "transport": {
         "type": "ws",
-        "path": "/game/www/5a057741b70d",
+        "path": "/links/groups/about/5a057741b70d",
         "headers": {
           "Host": "n.shay.dpdns.org"
         }
@@ -412,7 +412,7 @@
       "password": "acd5787a-7a32-4c28-b093-c1fbebcaa42b",
       "transport": {
         "type": "ws",
-        "path": "/act/5a057741b70d",
+        "path": "/program/5a057741b70d",
         "headers": {
           "Host": "n.shay.dpdns.org"
         }
@@ -439,7 +439,7 @@
       "password": "acd5787a-7a32-4c28-b093-c1fbebcaa42b",
       "transport": {
         "type": "ws",
-        "path": "/en/www/feedback/5a057741b70d",
+        "path": "/question/article/5a057741b70d",
         "headers": {
           "Host": "n.shay.dpdns.org"
         }
@@ -466,7 +466,7 @@
       "password": "acd5787a-7a32-4c28-b093-c1fbebcaa42b",
       "transport": {
         "type": "ws",
-        "path": "/collect/site/temp/5a057741b70d",
+        "path": "/gif/5a057741b70d",
         "headers": {
           "Host": "n.shay.dpdns.org"
         }
@@ -493,7 +493,7 @@
       "password": "acd5787a-7a32-4c28-b093-c1fbebcaa42b",
       "transport": {
         "type": "ws",
-        "path": "/en/5a057741b70d",
+        "path": "/clip/clips/5a057741b70d",
         "headers": {
           "Host": "n.shay.dpdns.org"
         }
@@ -520,7 +520,7 @@
       "password": "acd5787a-7a32-4c28-b093-c1fbebcaa42b",
       "transport": {
         "type": "ws",
-        "path": "/shows/pages/payment/5a057741b70d",
+        "path": "/discuss/category/5a057741b70d",
         "headers": {
           "Host": "n.shay.dpdns.org"
         }
@@ -547,7 +547,7 @@
       "password": "acd5787a-7a32-4c28-b093-c1fbebcaa42b",
       "transport": {
         "type": "ws",
-        "path": "/zh-cn/tech/videos/5a057741b70d",
+        "path": "/readme/trade/5a057741b70d",
         "headers": {
           "Host": "n.shay.dpdns.org"
         }
@@ -574,7 +574,7 @@
       "password": "acd5787a-7a32-4c28-b093-c1fbebcaa42b",
       "transport": {
         "type": "ws",
-        "path": "/programs/friend/5a057741b70d",
+        "path": "/p/5a057741b70d",
         "headers": {
           "Host": "n.shay.dpdns.org"
         }
@@ -601,7 +601,7 @@
       "password": "acd5787a-7a32-4c28-b093-c1fbebcaa42b",
       "transport": {
         "type": "ws",
-        "path": "/jp/chat/events/5a057741b70d",
+        "path": "/activity/data/settings/5a057741b70d",
         "headers": {
           "Host": "n.shay.dpdns.org"
         }
@@ -628,7 +628,7 @@
       "password": "acd5787a-7a32-4c28-b093-c1fbebcaa42b",
       "transport": {
         "type": "ws",
-        "path": "/f/5a057741b70d",
+        "path": "/tag/mag/5a057741b70d",
         "headers": {
           "Host": "n.shay.dpdns.org"
         }
@@ -655,7 +655,7 @@
       "password": "acd5787a-7a32-4c28-b093-c1fbebcaa42b",
       "transport": {
         "type": "ws",
-        "path": "/topic/5a057741b70d",
+        "path": "/link/5a057741b70d",
         "headers": {
           "Host": "n.shay.dpdns.org"
         }
@@ -682,7 +682,7 @@
       "password": "acd5787a-7a32-4c28-b093-c1fbebcaa42b",
       "transport": {
         "type": "ws",
-        "path": "/service/5a057741b70d",
+        "path": "/channel/doujin/5a057741b70d",
         "headers": {
           "Host": "n.shay.dpdns.org"
         }
@@ -709,7 +709,7 @@
       "password": "acd5787a-7a32-4c28-b093-c1fbebcaa42b",
       "transport": {
         "type": "ws",
-        "path": "/bt/user/download/5a057741b70d",
+        "path": "/my/pay/5a057741b70d",
         "headers": {
           "Host": "n.shay.dpdns.org"
         }
@@ -736,7 +736,7 @@
       "password": "acd5787a-7a32-4c28-b093-c1fbebcaa42b",
       "transport": {
         "type": "ws",
-        "path": "/dh/5a057741b70d",
+        "path": "/project/5a057741b70d",
         "headers": {
           "Host": "n.shay.dpdns.org"
         }
@@ -763,7 +763,7 @@
       "password": "acd5787a-7a32-4c28-b093-c1fbebcaa42b",
       "transport": {
         "type": "ws",
-        "path": "/blog/buy/5a057741b70d",
+        "path": "/pay/episode/5a057741b70d",
         "headers": {
           "Host": "n.shay.dpdns.org"
         }
@@ -790,7 +790,7 @@
       "password": "acd5787a-7a32-4c28-b093-c1fbebcaa42b",
       "transport": {
         "type": "ws",
-        "path": "/user/shop/p/5a057741b70d",
+        "path": "/torrent/go.php/bd/5a057741b70d",
         "headers": {
           "Host": "n.shay.dpdns.org"
         }
